@@ -8,8 +8,10 @@ torch.manual_seed(423504)
 
 
 class CNN(nn.Module):
-    def __init__(self):
+    def __init__(self, image_d, accelerate_d):
         super(CNN, self).__init__()
+        self.image = image_d
+        self.accelerate = accelerate_d
         #imageデータ
         self.batch_norm0 = nn.BatchNorm2d(1, momentum=0.8)
 
@@ -62,47 +64,47 @@ class CNN(nn.Module):
         x_acc = x[:,:,:,64:67].view(-1,1,frame_acc)
         #print(x_img.shape,x_acc.shape)
         #imageデータ
+        if self.image == True:
+            x_img = self.batch_norm0(x_img)
+            #print(x.shape)
+            x_img = self.relu(self.conv1(x_img))
+            x_img = self.batch_norm1(x_img)
+            x_img = self.max_pool1(x_img)
+            x_img = self.dropout1_2(x_img)
+            '''
+            #print(x.shape)
+            x_img = self.relu(self.conv2(x_img))
+            x_img = self.batch_norm2(x_img)
+            x_img = self.max_pool2(x_img)
+            x_img = self.dropout1_2(x_img)
+            #print(x.shape)
 
-        x_img = self.batch_norm0(x_img)
-        #print(x.shape)
-        x_img = self.relu(self.conv1(x_img))
-        x_img = self.batch_norm1(x_img)
-        x_img = self.max_pool1(x_img)
-        x_img = self.dropout1_2(x_img)
-        '''
-        #print(x.shape)
-        x_img = self.relu(self.conv2(x_img))
-        x_img = self.batch_norm2(x_img)
-        x_img = self.max_pool2(x_img)
-        x_img = self.dropout1_2(x_img)
-        #print(x.shape)
+            x_img = self.leaky_relu(self.conv3(x_img))
+            x_img = self.batch_norm3(x_img)
+            x_img = self.max_pool3(x_img)
+            x_img = self.dropout3_4(x_img)
+            #print(x.shape)
 
-        x_img = self.leaky_relu(self.conv3(x_img))
-        x_img = self.batch_norm3(x_img)
-        x_img = self.max_pool3(x_img)
-        x_img = self.dropout3_4(x_img)
-        #print(x.shape)
-
-        x_img = self.leaky_relu(self.conv4(x_img))
-        x_img = self.batch_norm4(x_img)
-        x_img = self.max_pool4(x_img)
-        x_img = self.dropout3_4(x_img)
-        '''
-        x_img = self.flatten(x_img)
-
+            x_img = self.leaky_relu(self.conv4(x_img))
+            x_img = self.batch_norm4(x_img)
+            x_img = self.max_pool4(x_img)
+            x_img = self.dropout3_4(x_img)
+            '''
+            x_img = self.flatten(x_img)
+            x = x_img
         #print(x_img)
         #accelerationデータ
-        x_acc = self.batch_norm0_acc(x_acc)
-        x_acc = self.relu(self.conv1_acc(x_acc))
-        x_acc = self.batch_norm1_acc(x_acc)
-        #x_acc = self.max_pool1_acc(x_acc)
-        #x_acc = self.dropout1_2_acc(x_acc)
-        x_acc = self.flatten(x_acc)
-
-        x = torch.cat([x_img,x_acc],dim=1)
-        
-        #x = x_img
-        #x = x_acc
+        if self.accelerate == True:
+            x_acc = self.batch_norm0_acc(x_acc)
+            x_acc = self.relu(self.conv1_acc(x_acc))
+            x_acc = self.batch_norm1_acc(x_acc)
+            #x_acc = self.max_pool1_acc(x_acc)
+            #x_acc = self.dropout1_2_acc(x_acc)
+            x_acc = self.flatten(x_acc)
+            x = x_acc
+        if (self.image == True & self.accelerate == True):
+            x = torch.cat([x_img,x_acc],dim=1)
+            
         #print(x.shape)
         #print(x.shape)
         # 出力テンソルの形状を元の形に戻す
@@ -190,4 +192,3 @@ class ConvSimpleRNN(nn.Module):
         x = self.fc2(x)
 
         return x
-

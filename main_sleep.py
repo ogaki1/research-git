@@ -11,11 +11,11 @@ data_folder = './dataset/ML_data'
 f = open('./experiment.txt', 'a') #出力ファイル
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-f.write('1回目-------------------------------\n')
+#f.write('1回目-------------------------------\n')
 
 train_frames_array, train_labels , valid_frames_array, valid_labels = sleep_data_to_numpy_array(data_folder)
-print(f'train_frames_shape:{train_labels.shape}')
-print(f'test_frames_shape:{valid_frames_array.shape}')
+#print(f'train_frames_shape:{train_labels.shape}')
+#print(f'test_frames_shape:{valid_frames_array.shape}')
 
 TrainDataset = MyDataset(train_frames_array,train_labels)
 TestDataset = MyDataset(valid_frames_array,valid_labels)
@@ -35,15 +35,16 @@ assert model in ['LSTM', 'SimpleRNN', 'TimeSformer'], 'The model is incorrectly 
 
 #モデル定義
 if model == 'LSTM':
-    cnn_1 = CNN().to(device)
+    cnn_1 = CNN(image_d=img_d, accelerate_d=acc_d).to(device)
     lstm = LSTM(input_size=rnn_input, hidden_size=hidden_size, num_layers=num_layers).to(device)
     model_LSTM = ConvLSTM(cnn_1,lstm,num_classes,hidden_size).to(device)
     optimizer = optim.Adam(model_LSTM.parameters(), lr=0.001)
-    model_arch=summary(model_LSTM, input_size=(batch_size,total_frames,1,frame_width*frame_height+frame_acc),col_names=["output_size", "num_params"])
+    summary(model_LSTM, input_size=(batch_size,total_frames,1,frame_width*frame_height+frame_acc),col_names=["output_size", "num_params"])
+    #para = summary(cnn_1, input_size=(batch_size,total_frames,1,frame_width*frame_height+frame_acc),col_names=["output_size"])
 
 
 elif model == 'SimpleRNN':
-    cnn_2 = CNN().to(device)
+    cnn_2 = CNN(image_d=img_d, accelerate_d=acc_d).to(device)
     simple_rnn = SimpleRNN(input_size=rnn_input, hidden_size=hidden_size, num_layers=num_layers).to(device)
     model_SimpleRNN = ConvSimpleRNN(cnn_2,simple_rnn,num_classes,hidden_size).to(device)
     optimizer = optim.Adam(model_SimpleRNN.parameters(), lr=0.001)
@@ -67,12 +68,9 @@ elif model == 'TimeSformer':
     optimizer = optim.Adamax(model_timesformer.parameters(),lr=0.001)
     summary(model_timesformer, input_size=(batch_size,total_frames,1,frame_width,frame_height),col_names=["output_size", "num_params"])
 
-#f.write(model_arch)
-
 #損失関数を定義
 #scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=5, gamma=0.1)
 criterion = nn.CrossEntropyLoss()
-
 
 #print(model_LSTM.state_dict())
 assert train in ['start'], 'モデルのみを表示'
