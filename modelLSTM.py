@@ -3,7 +3,6 @@ import torch.nn as nn
 from torchinfo import summary
 import torch.optim as optim
 from define import *
-from timesformer_pytorch
 
 torch.manual_seed(423504)
 
